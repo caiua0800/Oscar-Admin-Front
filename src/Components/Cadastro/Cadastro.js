@@ -4,11 +4,11 @@ import helpers from "../../helpers";
 import { AuthContext } from "../../Context/AuthContext";
 
 export default function Cadastro() {
-    const { clients } = useContext(AuthContext);
+    const { clients, atualizarDados } = useContext(AuthContext);
     const [showIndicadores, setShowIndicadores] = useState(false);
     const [sponsorSelected, setSponsorSelected] = useState(null);
     const [filteredSponsors, setFilteredSponsors] = useState([]);
-    
+
     const [cliente, setCliente] = useState({
         name: "",
         id: "",
@@ -52,13 +52,13 @@ export default function Cadastro() {
 
     const handleCreate = async () => {
         // Validação para checar se todos os campos necessários estão preenchidos
-        if (!cliente.name || !cliente.id || !cliente.email || !cliente.phone || !cliente.address.street || 
-            !cliente.address.number || !cliente.address.city || !cliente.address.zipcode || 
+        if (!cliente.name || !cliente.id || !cliente.email || !cliente.phone || !cliente.address.street ||
+            !cliente.address.number || !cliente.address.city || !cliente.address.zipcode ||
             !cliente.password || !cliente.confirmPassword || cliente.password != cliente.confirmPassword || !cliente.address.state) {
 
-            if(cliente.password != cliente.confirmPassword){
+            if (cliente.password != cliente.confirmPassword) {
                 alert("As senhas não se coincidem.")
-            }else alert("Por favor, preencha todos os campos obrigatórios.");
+            } else alert("Por favor, preencha todos os campos obrigatórios.");
             return;
         }
 
@@ -68,7 +68,7 @@ export default function Cadastro() {
             return;
         }
 
-        if(cliente.sponsorId.trim() === ""){
+        if (cliente.sponsorId.trim() === "") {
             setCliente({
                 ...cliente,
                 sponsorId: "" // Assegura que sponsorId está vazio se não for preenchido
@@ -78,6 +78,7 @@ export default function Cadastro() {
         const response = await helpers.cadastro(cliente);
         if (response) {
             alert("Cliente criado com sucesso!");
+            await atualizarDados();
             setCliente({ // Reseta os campos de cliente após criação
                 name: "",
                 id: "",
@@ -89,8 +90,8 @@ export default function Cadastro() {
                 profession: "",
                 monthlyIncome: "",
                 password: "",
-                confirmPassword: "", 
-                sponsorId: "", 
+                confirmPassword: "",
+                sponsorId: "",
                 address: {
                     street: "",
                     number: "",
@@ -107,22 +108,23 @@ export default function Cadastro() {
 
     const handleChangeIndicador = (e) => {
         const val = e.target.value;
-    
+
         if (val.trim() !== "") {
             setShowIndicadores(true);
-            
+
             // Filtra os clientes garantindo que name e cpf sejam definidos
-            const filtered = clients.filter(cl => 
-                (cl.name && cl.name.toUpperCase().includes(val.toUpperCase())) || 
+            const filtered = clients.filter(cl =>
+                (cl.name && cl.name.toUpperCase().includes(val.toUpperCase())) ||
                 (cl.cpf && cl.cpf.includes(val))
             );
+
             setFilteredSponsors(filtered);
         } else {
             setSponsorSelected(null);
             setFilteredSponsors([]);
             setShowIndicadores(false);
         }
-    
+
         // Atualiza o sponsorId no cliente
         setCliente(prevState => ({
             ...prevState,
@@ -131,12 +133,14 @@ export default function Cadastro() {
     };
 
     const handleSelectSponsor = (sponsor) => {
-        setSponsorSelected(sponsor);
-        setCliente(prevState => ({
-            ...prevState,
-            sponsorId: sponsor.id || ""
-        }));
-        setShowIndicadores(false); // Para esconder o dropdown após seleção
+        if (sponsor && sponsor.id) {  // Verifica se sponsor e sponsor.id estão definidos
+            setSponsorSelected(sponsor);
+            setCliente(prevState => ({
+                ...prevState,
+                sponsorId: sponsor.id || ""
+            }));
+            setShowIndicadores(false); // Para esconder o dropdown após seleção
+        }
     };
 
     return (
@@ -175,10 +179,10 @@ export default function Cadastro() {
                     <input name="zipcode" placeholder="CEP" value={cliente.address.zipcode} onChange={handleChange} />
                 </S.Informacao>
                 <S.Informacao>
-                    <input 
-                        name="sponsorId" 
-                        placeholder="Indicador" 
-                        value={cliente.sponsorId} 
+                    <input
+                        name="sponsorId"
+                        placeholder="Indicador"
+                        value={cliente.sponsorId}
                         onChange={handleChangeIndicador}
                         type="text"
                     />

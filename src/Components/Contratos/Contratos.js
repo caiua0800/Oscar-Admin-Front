@@ -69,6 +69,10 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
                 purchaseDate: new Date(purchase.purchaseDate).toLocaleDateString("pt-BR"),
                 endContractDate: new Date(purchase.endContractDate).toLocaleDateString("pt-BR"),
                 finalIncome: purchase.finalIncome.toFixed(2),
+                ticketId: purchase.ticketId,
+                ticketPayment: purchase.ticketPayment,
+                qrCode: purchase.qrCode,
+                qrCodeBase64: purchase.qrCodeBase64,
                 status: purchase.status === 1 ? "Pendente" :
                     purchase.status === 2 ? "Valorizando" :
                         purchase.status === 3 ? "Finalizado" :
@@ -78,6 +82,8 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
 
         setData(formattedData);
     }, [purchases, clients]);
+
+    console.log(purchases)
 
     const handleSearchChange = (event) => {
         const value = event.target.value.toLowerCase();

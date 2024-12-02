@@ -1,9 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import * as S from "./MeuGatewayStyle";
+import { AuthContext } from "../../Context/AuthContext";
+import helpers from "../../helpers";
 
 export default function MeuGateway() {
-    // Estado para controlar a porcentagem
-    const [percent, setPercent] = useState(75); // Por exemplo, 75%
+    const { valorTotalNaPlataforma, valorClientesParaSacarNaPlataforma, valorSaquesNaPlataforma, comprasAReceber, valorAReceber } = useContext(AuthContext);
+    const [percent, setPercent] = useState(75); 
+    const [withdrawValue, setWithdrawValue] = useState(0);
+
+
+    const handleCreateWithdraw = async () => {
+        if(parseFloat(withdrawValue) > 0){
+            const res = await helpers.handleCreateAdminWithdraw(withdrawValue);
+
+            if(res){
+                alert("SAQUE SOLICITADO COM SUCESSO.");
+            }else{
+                alert("ERRO AO SOLICITAR SAQUE.");
+            }
+        }
+    }
 
     return (
         <>
@@ -19,7 +35,7 @@ export default function MeuGateway() {
 
                         <div className="boxInfo">
                             <span className="quantidadeCompras">Valor Atual no Gateway</span>
-                            <span className="quantidadeDinheiro">R$102.109,00</span>
+                            <span className="quantidadeDinheiro">R${helpers.formatNumberToCurrency(valorTotalNaPlataforma * 0.975)}</span>
                         </div>
 
                         <div className="barraHorizontal">
@@ -36,8 +52,8 @@ export default function MeuGateway() {
                             <span className="name">Clientes à Pagar</span>
                         </div>
                         <div className="boxInfo">
-                            <span className="quantidadeCompras">80 Clientes</span>
-                            <span className="quantidadeDinheiro">R$20.109,00</span>
+                            <span className="quantidadeCompras">{valorClientesParaSacarNaPlataforma > 1 ? `${valorClientesParaSacarNaPlataforma} Clientes` : valorClientesParaSacarNaPlataforma === 0 ? "Nenhum Cliente" : `${valorClientesParaSacarNaPlataforma} Cliente`}</span>
+                            <span className="quantidadeDinheiro">R${helpers.formatNumberToCurrency(valorSaquesNaPlataforma)}</span>
                         </div>
 
                         <div className="barraHorizontal">
@@ -46,16 +62,15 @@ export default function MeuGateway() {
                                 <div className="preenchimento" style={{ width: `${percent}%` }} />
                             </div>
                         </div>
-
                     </S.Box>
 
                     <S.Box>
                         <div className="titleName">
-                            <span className="name">Recompras à Pagar</span>
+                            <span className="name">Valor À Receber</span>
                         </div>
                         <div className="boxInfo">
-                            <span className="quantidadeCompras">3 Recompras</span>
-                            <span className="quantidadeDinheiro">R$12.109,00</span>
+                            <span className="quantidadeCompras">{comprasAReceber > 1 ? `${comprasAReceber} Compras Pendentes` : comprasAReceber === 0 ? "Nenhuma Compra" : `${comprasAReceber} Compra Pendente`}</span>
+                            <span className="quantidadeDinheiro">R${helpers.formatNumberToCurrency(valorAReceber * 0.975)}</span>
                         </div>
 
                         <div className="barraHorizontal">
@@ -74,7 +89,7 @@ export default function MeuGateway() {
                         </div>
                         <div className="boxInfo">
                             <span className="quantidadeCompras">Valor Total de Pagamentos</span>
-                            <span className="quantidadeDinheiro">R$32.218,00</span>
+                            <span className="quantidadeDinheiro">R${helpers.formatNumberToCurrency(valorSaquesNaPlataforma)}</span>
                         </div>
                         <div className="barraHorizontal">
                             <span className="name">Referente ao Saldo Total</span>
@@ -92,7 +107,7 @@ export default function MeuGateway() {
                         </div>
                         <div className="boxInfo">
                             <span className="quantidadeCompras">Valor Retirando os Pagamentos</span>
-                            <span className="quantidadeDinheiro">R$12.109,00</span>
+                            <span className="quantidadeDinheiro">R${helpers.formatNumberToCurrency((valorTotalNaPlataforma * 0.975) - (valorSaquesNaPlataforma))}</span>
                         </div>
                         <div className="barraHorizontal">
                             <span className="name">Referente ao Saldo Total</span>
@@ -108,8 +123,8 @@ export default function MeuGateway() {
                 </S.SolicitarSaqueTitle>
 
                 <S.SolicitarSaque>
-                    <input type="number" />
-                    <button>Solicitar</button>
+                    <input value={withdrawValue} onChange={(e) => setWithdrawValue(e.target.value)} type="number" />
+                    <button onClick={handleCreateWithdraw}>Solicitar</button>
                 </S.SolicitarSaque>
 
                 <S.HistoricoSaquesTitle>

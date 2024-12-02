@@ -80,6 +80,9 @@ export default function NovoSaque() {
                     alert("Saque criado com sucesso para o extra balance, erro para os contratos. 👍🏻");
                     return;
                 }
+            }else{
+                alert("Saque criado com sucesso. 👍🏻");
+                return;
             }
         } else {
             const res = await helpers.novoSaqueExtraBalance(selectedClient.id, amountDesired);

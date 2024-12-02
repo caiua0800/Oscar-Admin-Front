@@ -43,7 +43,7 @@ const helpers = {
     cadastro: async (cliente) => {
         if (cliente) {
             try {
-                const res = await axios.post(`http://localhost:5255/api/client`, cliente);
+                const res = await axios.post(`${process.env.REACT_APP_BASE_ROUTE}client`, cliente);
                 console.log(`Resposta Servidor (Criação De Cliente): ${res}`);
                 return true;
             } catch (err) {
@@ -63,7 +63,7 @@ const helpers = {
 
         if (cliente) {
             try {
-                const res = await axios.put(`http://localhost:5255/api/client/${cliente.id}`, cliente);
+                const res = await axios.put(`${process.env.REACT_APP_BASE_ROUTE}client/${cliente.id}`, cliente);
                 console.log(res);
                 if (res.status === 204) { // Verifique se a resposta foi 'No Content'
                     alert("Cliente atualizado com sucesso!"); // Alerta de sucesso
@@ -92,7 +92,7 @@ const helpers = {
 
         if (contrato) {
             try {
-                const res = await axios.put(`http://localhost:5255/api/purchase/${contrato.purchaseId}`, contrato);
+                const res = await axios.put(`${process.env.REACT_APP_BASE_ROUTE}purchase/${contrato.purchaseId}`, contrato);
                 console.log(res);
                 if (res.status === 204) {
                     return true;
@@ -112,7 +112,7 @@ const helpers = {
     editarStatusContrato: async (contratoId, newStatus) => {
         if (contratoId && newStatus) {
             try {
-                const res = await axios.put(`http://localhost:5255/api/purchase/${contratoId}/${newStatus}`);
+                const res = await axios.put(`${process.env.REACT_APP_BASE_ROUTE}purchase/${contratoId}/${newStatus}`);
                 console.log(res);
                 if (res.status === 204) {
                     return true;
@@ -162,7 +162,7 @@ const helpers = {
             contrato.status = 1;
 
             try {
-                const res = await axios.post(`http://localhost:5255/api/purchase`, contrato);
+                const res = await axios.post(`${process.env.REACT_APP_BASE_ROUTE}purchase`, contrato);
                 if (res.status === 201) {
                     alert("Contrato criado com sucesso.");
                     return res.data;
@@ -188,7 +188,7 @@ const helpers = {
         }
 
         try {
-            const res = await axios.put(`http://localhost:5255/api/withdrawal/${id}/${newStatus}`);
+            const res = await axios.put(`${process.env.REACT_APP_BASE_ROUTE}withdrawal/${id}/${newStatus}`);
             console.log(res);
             if (res.status === 204)
                 return true;
@@ -211,7 +211,7 @@ const helpers = {
         try {
             for (const contract of selectedContracts) {
                 try {
-                    const res = await axios.post(`http://localhost:5255/api/withdrawal`, {
+                    const res = await axios.post(`${process.env.REACT_APP_BASE_ROUTE}withdrawal`, {
                         clientId,
                         amountWithdrawn: parseFloat(contract.amount),
                         itemId: contract.purchaseId
@@ -257,7 +257,7 @@ const helpers = {
         }
 
         try {
-            const res = await axios.post(`http://localhost:5255/api/withdrawal/extraBalance`, {
+            const res = await axios.post(`${process.env.REACT_APP_BASE_ROUTE}withdrawal/extraBalance`, {
                 clientId,
                 amountWithdrawn: parseFloat(amount),
                 itemId: ""
@@ -303,7 +303,7 @@ const helpers = {
     adicionarSaldoAContrato: async (purchaseId, amount) => {
         if (purchaseId && amount) {
             try {
-                const response = await axios.put(`http://localhost:5255/api/purchase/${purchaseId}/add/${amount}`);
+                const response = await axios.put(`${process.env.REACT_APP_BASE_ROUTE}purchase/${purchaseId}/add/${amount}`);
                 if (response) {
                     return true;
                 }
@@ -319,7 +319,7 @@ const helpers = {
     anteciparLucroDoContrato: async (purchaseId, amount) => {
         if (purchaseId && amount) {
             try {
-                const response = await axios.put(`http://localhost:5255/api/purchase/${purchaseId}/anticipate-profit/${amount}`);
+                const response = await axios.put(`${process.env.REACT_APP_BASE_ROUTE}purchase/${purchaseId}/anticipate-profit/${amount}`);
                 if (response) {
                     return true;
                 }
@@ -335,7 +335,7 @@ const helpers = {
     cancelamentoDoContrato: async (purchaseId) => {
         if (purchaseId) {
             try {
-                const response = await axios.put(`http://localhost:5255/api/purchase/cancel/${purchaseId}`);
+                const response = await axios.put(`${process.env.REACT_APP_BASE_ROUTE}purchase/cancel/${purchaseId}`);
                 if (response) {
                     return true;
                 }
@@ -351,7 +351,7 @@ const helpers = {
     cancelamentoDoContrato: async (clientId) => {
         if (clientId) {
             try {
-                const response = await axios.put(`http://localhost:5255/api/client/${clientId}/exclude`);
+                const response = await axios.put(`${process.env.REACT_APP_BASE_ROUTE}client/${clientId}/exclude`);
                 if (response) {
                     return true;
                 }
@@ -373,8 +373,33 @@ const helpers = {
             default:
                 return "Não Encontrado"
         }
-    }
+    },
 
+    handleCreateAdminWithdraw: async (amount) => {
+        if (!amount) {
+            alert("Erro ao realizar saque de admin: Informações incompletas.");
+            console.log("Erro ao realizar saque de admin: Informações incompletas.");
+            return null;
+        }
+
+        try {
+            const res = await axios.post(`${process.env.REACT_APP_BASE_ROUTE}adminwithdrawal`, {
+                amountWithdrawn: parseFloat(amount),
+            });
+
+            if (res.status === 201) {
+                console.log("Saque de admin criado com sucesso.", res.data);
+                return true;
+            } else {
+                console.log("Erro ao criar saque de admin:", res);
+                return null;
+            }
+        } catch (error) {
+            console.log(error);
+            alert("Erro ao solicitar saque.");
+            return null;
+        }
+    }
 }
 
 export default helpers;

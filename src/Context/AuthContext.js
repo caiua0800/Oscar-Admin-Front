@@ -8,45 +8,23 @@ export const AuthProvider = ({ children }) => {
   const [purchases, setPurchases] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
   const [extracts, setExtracts] = useState([]);
-  const [webSocket, setWebSocket] = useState(null);
-
-  const connectWebSocket = () => {
-    const socket = new WebSocket('ws://localhost:5255/ws');
-
-    socket.onopen = () => {
-      console.log('Conectado ao WebSocket');
-    };
-
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      if (data.event === 'new_client') {
-        console.log('Novo cliente recebido:', data.client);
-        setClients(prevClients => {
-          if (!prevClients.some(client => client.id === data.client.id)) {
-            return [...prevClients, data.client];
-          }
-          return prevClients;
-        });
-      }
-    };
-
-    socket.onclose = () => {
-      console.log('Desconectado do WebSocket');
-    };
-
-    setWebSocket(socket);
-  };
+  const [valorTotalNaPlataforma, setValorTotalNaPlataforma] = useState(0);
+  const [valorSaquesNaPlataforma, setValorSaquesNaPlataforma] = useState(0);
+  const [valorClientesParaSacarNaPlataforma, setValorClientesParaSacarNaPlataforma] = useState(0);
+  const [valorAReceber, setValorAReceber] = useState(0);
+  const [comprasAReceber, setComprasAReceber] = useState(0);
+  const [gatewayData, setGatewayData] = useState(null);
 
   const fetchData = async (token) => {
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
-      const [clientsResponse, purchasesResponse, withdrawalsResponse, extractsResponse] = await Promise.all([
-        fetch('http://localhost:5255/api/client/', { headers }),
-        fetch('http://localhost:5255/api/purchase', { headers }),
-        fetch('http://localhost:5255/api/withdrawal', { headers }),
-        fetch('http://localhost:5255/api/extract', { headers }),
+      const [clientsResponse, purchasesResponse, withdrawalsResponse, extractsResponse, gatewayResponse] = await Promise.all([
+        fetch(`${process.env.REACT_APP_BASE_ROUTE}client/`, { headers }),
+        fetch(`${process.env.REACT_APP_BASE_ROUTE}purchase`, { headers }),
+        fetch(`${process.env.REACT_APP_BASE_ROUTE}withdrawal`, { headers }),
+        fetch(`${process.env.REACT_APP_BASE_ROUTE}extract`, { headers }),
+        fetch(`${process.env.REACT_APP_BASE_ROUTE}gateway`, { headers }),
       ]);
 
       if (clientsResponse.ok) {
@@ -62,23 +40,25 @@ export const AuthProvider = ({ children }) => {
       if (withdrawalsResponse.ok) {
         const withdrawalsData = await withdrawalsResponse.json();
         setWithdrawals(withdrawalsData);
-        console.log(withdrawalsData);
       }
 
       if (extractsResponse.ok) {
         const extractsData = await extractsResponse.json();
         setExtracts(extractsData);
-        console.log(extractsData);
+      }
+
+      if (gatewayResponse.ok) {
+        const gatewayDataS = await gatewayResponse.json();
+        setGatewayData(gatewayDataS);
       }
     } catch (error) {
       console.error('Erro ao buscar dados do cliente, compras ou saques:', error);
     }
   };
 
-  // Função de login
   const login = async (cpf, password) => {
     try {
-      const response = await fetch('http://localhost:5255/api/auth/token', {
+      const response = await fetch(`${process.env.REACT_APP_BASE_ROUTE}auth/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,8 +70,8 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json();
         setAuthState({ token: data.token, isAuthenticated: true });
         localStorage.setItem('token', data.token);
-        connectWebSocket(); // Conecta ao WebSocket após o login
-        await fetchData(data.token); // Busca informações após o login
+        fetchData(data.token); // Busca informações após o login
+        listenToWebhook(); // Escuta os webhooks após o login
         return true;
       }
     } catch (error) {
@@ -100,116 +80,76 @@ export const AuthProvider = ({ children }) => {
     return false;
   };
 
-  // Função de logout
   const logout = () => {
     setAuthState({ token: null, isAuthenticated: false });
     localStorage.removeItem('token');
-    if (webSocket) {
-      webSocket.close(); // Fecha a conexão do WebSocket
-      setWebSocket(null); // Limpa a referência do WebSocket
-    }
   };
 
-  // Verifica o token no localStorage ao montar o componente
+  const listenToWebhook = () => {
+    const eventSource = new EventSource('webhook'); // Altere para a URL apropriada do seu webhook
+
+    eventSource.onmessage = (event) => {
+      console.log('Mensagem recebida do webhook:', event.data);
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('Erro ao escutar o webhook:', error);
+      eventSource.close(); // Fecha a conexão em caso de erro
+    };
+
+    return () => {
+      eventSource.close(); // Limpeza da conexão ao desmontar o componente
+    };
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       setAuthState({ token, isAuthenticated: true });
       fetchData(token); // Busca dados do usuário autenticado
-      connectWebSocket(); // Conecta ao WebSocket se tiver um token
+      listenToWebhook(); // Escuta os webhooks ao carregar o token
     }
   }, []);
 
-  const editarCliente = (updatedClient) => {
-    setClients(prevClients => {
-      return prevClients.map(client =>
-        client.id === updatedClient.id ? updatedClient : client
-      );
-    });
-  };
-
-  const editarContract = (updatedContract) => {
-    setPurchases(prevContract => {
-      return prevContract.map(contract =>
-        contract.purchaseId === updatedContract.purchaseId ? updatedContract : contract
-      );
-    });
-  };
-
-  const buscarContratoPorId = (purchaseId) => {
-    return purchases.find(contract => contract.purchaseId === purchaseId);
-  };
-
-  const atualizarContratoPorId = (updatedContract) => {
-    setPurchases(prevPurchases => {
-      return prevPurchases.map(contract =>
-        contract.purchaseId === updatedContract.purchaseId ? updatedContract : contract
-      );
-    });
-  };
-
-  const buscarClientePorId = (clientId) => {
-    return clients.find(client => client.id === clientId);
-  };
-
-  const atualizarClientePorId = (updatedClient) => {
-    setClients(prevClients => {
-      return prevClients.map(client =>
-        client.id === updatedClient.id ? updatedClient : client
-      );
-    });
-  };
-
-  const adicionarContract = async () => {
-    const token = authState.token;
-    const headers = { Authorization: `Bearer ${token}` };
-
-    try {
-      const response = await fetch('http://localhost:5255/api/purchase', { headers });
-
-      if (response.ok) {
-        const purchasesData = await response.json(); // Obtém os dados das compras
-        setPurchases(purchasesData); // Atualiza o estado com os dados recebidos
-      } else {
-        console.log("Erro ao buscar compras:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar compras:", error);
+  useEffect(() => {
+    if (purchases && clients && purchases.length > 0) {
+      var somatorio = 0;
+      var somatorioValorAReceber = 0;
+      var somatorioComprasAReceber = 0;
+      purchases.forEach(purchase => {
+        if (purchase.status === 2) {
+          somatorio += purchase.amountPaid + (purchase.currentIncome - purchase.amountWithdrawn);
+        } else if (purchase.status === 3) {
+          somatorio += (purchase.currentIncome - purchase.amountWithdrawn);
+        } else if (purchase.status === 1){
+          somatorioValorAReceber += purchase.amountPaid;
+          somatorioComprasAReceber++;
+        }
+      });
+      setValorTotalNaPlataforma(somatorio);
+      setValorAReceber(somatorioValorAReceber);
+      setComprasAReceber(somatorioComprasAReceber);
     }
-  };
 
-  const atualizarSaque = (id, newStatus) => {
-    setWithdrawals(prevWithdrawals => {
-      return prevWithdrawals.map(withdrawal =>
-        withdrawal.withdrawalId === id ? { ...withdrawal, status: newStatus } : withdrawal
-      );
-    });
+    if (withdrawals && withdrawals.length > 0) {
+      var somatorioDinheiro = 0;
+      var arrayClientes = new Set();
 
-    const token = authState.token; // Obtém o token do estado de autenticação
-    const headers = { Authorization: `Bearer ${token}` }; // Define os cabeçalhos
-
-    fetch(`http://localhost:5255/api/withdrawal/${id}/${newStatus}`, {
-      method: 'PUT',
-      headers: headers,
-    })
-      .then(response => {
-        if (!response.ok) {
-          console.error("Erro ao atualizar o saque:", response.statusText);
-        } else {
-          console.log("Status do saque atualizado com sucesso.");
+      withdrawals.forEach(withdrawal => {
+        if (withdrawal.status === 1) {
+          somatorioDinheiro += parseFloat(withdrawal.amountWithdrawn * 0.96);
+          arrayClientes.add(withdrawal.clientId);
         }
       })
-      .catch(error => {
-        console.error("Erro ao atualizar o saque:", error);
-      });
-  };
-
-  const atualizarDados = async () => {
-    await fetchData(authState.token);
-  }
+      setValorClientesParaSacarNaPlataforma(arrayClientes.size);
+      setValorSaquesNaPlataforma(somatorioDinheiro);
+    }
+  }, [purchases, clients, withdrawals]);
 
   return (
-    <AuthContext.Provider value={{ authState, login, clients, purchases, withdrawals, extracts, logout, editarCliente, editarContract, adicionarContract, atualizarSaque, atualizarDados, atualizarContratoPorId, atualizarClientePorId }}>
+    <AuthContext.Provider value={{ authState, login, logout, clients, purchases, withdrawals, 
+    extracts, valorTotalNaPlataforma, valorSaquesNaPlataforma, valorClientesParaSacarNaPlataforma, 
+    valorAReceber, comprasAReceber, gatewayData }}>
       {children}
     </AuthContext.Provider>
   );
