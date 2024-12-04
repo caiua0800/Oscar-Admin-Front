@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [valorClientesParaSacarNaPlataforma, setValorClientesParaSacarNaPlataforma] = useState(0);
   const [valorAReceber, setValorAReceber] = useState(0);
   const [comprasAReceber, setComprasAReceber] = useState(0);
+  const [chats, setChats] = useState([]);
   const [gatewayData, setGatewayData] = useState(null);
   const { startLoading, stopLoading } = useLoad();
 
@@ -22,12 +23,13 @@ export const AuthProvider = ({ children }) => {
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
-      const [clientsResponse, purchasesResponse, withdrawalsResponse, extractsResponse, gatewayResponse] = await Promise.all([
+      const [clientsResponse, purchasesResponse, withdrawalsResponse, extractsResponse, gatewayResponse, chatResponse] = await Promise.all([
         fetch(`${process.env.REACT_APP_BASE_ROUTE}client/`, { headers }),
         fetch(`${process.env.REACT_APP_BASE_ROUTE}purchase`, { headers }),
         fetch(`${process.env.REACT_APP_BASE_ROUTE}withdrawal`, { headers }),
         fetch(`${process.env.REACT_APP_BASE_ROUTE}extract`, { headers }),
         fetch(`${process.env.REACT_APP_BASE_ROUTE}gateway`, { headers }),
+        fetch(`${process.env.REACT_APP_BASE_ROUTE}chat/all`, { headers }),
       ]);
 
       if (clientsResponse.ok) {
@@ -53,6 +55,11 @@ export const AuthProvider = ({ children }) => {
       if (gatewayResponse.ok) {
         const gatewayDataS = await gatewayResponse.json();
         setGatewayData(gatewayDataS);
+      }
+
+      if (chatResponse.ok) {
+        const chatsData = await chatResponse.json();
+        setChats(chatsData);
       }
     } catch (error) {
       console.error('Erro ao buscar dados do cliente, compras ou saques:', error);
@@ -138,6 +145,24 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const atualizarChat = (newChat) => {
+    if (newChat) {
+      setChats(prevChats => {
+        return prevChats.map(chat =>
+          chat.clientId === newChat.clientId ? newChat : chat 
+        );
+      });
+    }
+  }
+
+  const atualizarTodosOsChats = async () => {
+    axios.get(`${process.env.REACT_APP_BASE_ROUTE}chat/all`).then(res => {
+      setChats(res.data);
+    }).catch(err => {
+      console.log(err);
+    })
+  }
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -181,11 +206,13 @@ export const AuthProvider = ({ children }) => {
     }
   }, [purchases, clients, withdrawals]);
 
+
   return (
     <AuthContext.Provider value={{
       authState, login, logout, clients, purchases, withdrawals,
       extracts, valorTotalNaPlataforma, valorSaquesNaPlataforma, valorClientesParaSacarNaPlataforma,
-      valorAReceber, comprasAReceber, gatewayData, adicionarContract, atualizarSaque, atualizarClientePorId, atualizarContratoPorId
+      valorAReceber, comprasAReceber, gatewayData, adicionarContract, atualizarSaque,
+       atualizarClientePorId, atualizarContratoPorId, chats, atualizarChat, atualizarTodosOsChats
     }}>
       {children}
     </AuthContext.Provider>

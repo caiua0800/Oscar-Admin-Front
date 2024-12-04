@@ -60,7 +60,7 @@ export const Pesquisa = styled.div`
 
 export const TabelaDeContratos = styled.div`
     width: 90%;
-    margin-top: 40px;
+    margin-top: 20px;
     max-height: 400px;
     overflow: auto;
 `;
@@ -338,7 +338,15 @@ export const Op = styled.div`
     }
 `;
 
-// export const nome = styled.div``;
+export const QuantidadeTotal = styled.div`
+    width: 100%;
+    display: flx;
+    align-items: center;
+    justify-content: center;
+    color: rgba(230, 230, 230, 0.7);
+    margin-top: 20px;
+
+`;
 
 // export const nome = styled.div``;
 

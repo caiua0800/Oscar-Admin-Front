@@ -23,6 +23,7 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
     const columns = [
         { name: "ID", value: "purchaseId" },
         { name: "CLIENTE", value: "clientName" },
+        { name: "PRODUTO", value: "productName" },
         { name: "VALOR TOTAL", value: "totalPrice", insertStart: "R$ ", formatFunction: helpers.formatNumberToCurrency },
         { name: "VALOR PAGO", value: "amountPaid", insertStart: "R$ ", formatFunction: helpers.formatNumberToCurrency },
         { name: "LUCRO ATUAL", value: "currentIncome", insertStart: "R$", formatFunction: helpers.formatNumberToCurrency },
@@ -42,6 +43,7 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [statusFilter, setStatusFilter] = useState("Todos");
+    const [productNameFilter, setProductNameFilter] = useState("Todos");
     const [sortOrder, setSortOrder] = useState("Crescente");
     const [campoParaOrdenar, setCampoParaOrdenar] = useState("purchaseDate");
     const itemsPerPage = 10;
@@ -69,6 +71,7 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
                 withdrawInterval: purchase.withdrawInterval,
                 description: purchase.description,
                 totalPrice: purchase.totalPrice.toFixed(2),
+                productName: purchase.productName,
                 amountPaid: purchase.amountPaid,
                 percentageProfit: purchase.percentageProfit,
                 currentIncome: purchase.currentIncome.toFixed(2),
@@ -105,8 +108,12 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
                 (statusFilter === "Valorizando" && row.status === "Valorizando") ||
                 (statusFilter === "Finalizado" && row.status === "Finalizado") ||
                 (statusFilter === "Cancelado" && row.status === "Cancelado");
+
             const searchMatch = Object.values(row).some(cell => typeof cell === 'string' && cell.toLowerCase().includes(searchTerm));
-            return statusMatch && searchMatch;
+
+            const productMatch = productNameFilter === "Todos" || row.productName.toLowerCase().trim().includes(productNameFilter.toLowerCase().trim());
+
+            return statusMatch && searchMatch && productMatch;
         });
 
         filteredData.sort((a, b) => {
@@ -433,6 +440,17 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
                         </S.Filtro>
 
                         <S.Filtro>
+                            <p>Nome do Produto</p>
+                            <S.FiltroSelect value={productNameFilter} onChange={(e) => setProductNameFilter(e.target.value)}>
+                                <option value="Todos">Todos</option>
+                                <option value="Advanced">Contrato Advanced</option>
+                                <option value="Colaborative">Contrato Colaborative</option>
+                                <option value="Introducer">Contrato Introducer</option>
+                                <option value="Personalizado">Contrato Personalizado</option>
+                            </S.FiltroSelect>
+                        </S.Filtro>
+
+                        <S.Filtro>
                             <p>Campo para Ordenar</p>
                             <S.FiltroSelect value={campoParaOrdenar} onChange={(e) => setCampoParaOrdenar(e.target.value)}>
                                 <option value="purchaseDate">Data da Compra</option>
@@ -449,6 +467,8 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
                         </S.Filtro>
                     </S.FiltrosSecondarios>
                 </S.Pesquisa>
+
+                <S.QuantidadeTotal>{currentItems.length > 1 ? currentItems.length + " CONTRATOS" : currentItems.length === 0 ? "0 CONTRATOS" : currentItems.length + " CONTRATO"}</S.QuantidadeTotal>
 
                 <S.TabelaDeContratos>
                     <TabelaGeral columns={columns} data={currentItems} type="contracts" setSelectedThing={handleContractSelect} />

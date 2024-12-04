@@ -18,6 +18,38 @@ const helpers = {
         return it;
     },
 
+    handleDesconhecido: (ir) => {
+        if (ir.trim().toLowerCase() === "desconhecido")
+            return "Kr Pay Services";
+        return ir;
+    },
+
+    formatRelativeDate: (inputDate) => {
+        const now = new Date();
+        const date = new Date(inputDate);
+    
+        // Calcula a diferença em milissegundos
+        const diffInMilliseconds = now - date;
+        const diffInDays = diffInMilliseconds / (1000 * 60 * 60 * 24);
+    
+        // Formata a hora e minuto
+        const hour = date.getHours().toString().padStart(2, '0');
+        const minute = date.getMinutes().toString().padStart(2, '0');
+    
+        if (diffInDays < 1) {
+            // Se faz menos de um dia
+            return `${hour}:${minute}`;
+        } else if (diffInDays < 2) {
+            // Se faz mais de um dia, mas menos de dois
+            return `ontem ${hour}:${minute}`;
+        } else {
+            // Se faz mais de dois dias
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 ao mês, pois em JavaScript começa em 0
+            return `${day}/${month} ${hour}:${minute}`;
+        }
+    },
+
     navegacao: (it, setActiveTab, setSelectedClient, selectedClient) => {
         switch (it) {
             case 0:

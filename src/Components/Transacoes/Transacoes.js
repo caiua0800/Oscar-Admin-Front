@@ -17,7 +17,7 @@ export default function Transacoes() {
     const columns = [
         { name: "ID", value: "extractId" },
         { name: "TIPO", value: "name" },
-        { name: "CLIENTE", value: "clientName" },
+        { name: "CLIENTE", value: "clientName", formatFunction: helpers.handleDesconhecido },
         { name: "ID CLIENTE", value: "clientId" },
         { name: "VALOR", value: "totalAmount", insertStart: "R$ ", formatFunction: helpers.formatNumberToCurrency }
     ];
@@ -28,6 +28,7 @@ export default function Transacoes() {
     const [nullThing, setNullThing] = useState(1);
     const itemsPerPage = 10;
     const [sortOrder, setSortOrder] = useState("Descrescente"); 
+
 
     useEffect(() => {
         const formattedData = extracts.map(extract => {
