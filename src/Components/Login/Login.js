@@ -20,14 +20,14 @@ export default function Login() {
     <S.LoginContainer>
       <S.BoxCentral>
         <h1>SEJA BEM VINDO</h1>
-        <S.Icone src="diamante-icon.png" />
+        {/* <S.Icone src="diamante-icon.png" /> */}
         <S.LoginInputs>
           <input type="text" value={cpf} onChange={(e) => setCpf(e.target.value)} placeholder="CPF..." />
           <input type={showPass ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha..." />
         </S.LoginInputs>
         <S.VerSenhaButton onClick={() => setShowPass(!showPass)}>{!showPass ? "ver senha" : "esconder senha"}</S.VerSenhaButton>
         <S.Button onClick={handleLogin}>ENTRAR</S.Button>
-        {error && <div>{error}</div>}
+        {error && <div className='err'>{error}</div>}
       </S.BoxCentral>
     </S.LoginContainer>
   );

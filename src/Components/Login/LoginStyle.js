@@ -7,14 +7,13 @@ export const LoginContainer = styled.div`
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    // background: linear-gradient(-45deg, #000000, #0B192C);
+    background: linear-gradient(-45deg, rgba(240, 200, 240, 1), rgba(200, 200, 200, 1));
 `;
 
 export const BoxCentral = styled.div`
     width: 450px;
     border-radius: 6px;
-    // background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(100, 100, 0, 0.6));
-    background: rgba(0, 100, 100, 1);
+    background: rgba(20, 20, 20, 1);
     box-shadow: 4px 4px 2px rgba(0,0,0,0.6);
     box-sizing: border-box;
     padding: 40px 30px;
@@ -23,7 +22,12 @@ export const BoxCentral = styled.div`
         margin: 0;
         margin-top: 10px;
         font-size: 38px;
-        color: black;
+        color: white;
+    }
+
+    .err{
+        color: rgba(230, 30, 10, 1);
+        font-weight: 600;
     }
 `;
 
@@ -50,7 +54,7 @@ export const Button = styled.div`
     box-sizing: border-box;
     font-size: 18px;
     color: rgba(0,0,0,0.8);
-    margin-top: 20px;
+    margin-top: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -71,8 +75,8 @@ export const VerSenhaButton = styled.div`
     font-size: rgba(0, 0, 200, 0,8);
     cursor: pointer;
     transition: .3s;
-
+    color: rgba(210, 210, 210, 0.8);
     &:hover{
-        color: blue;
+        color: white;
     }
 `;

@@ -1,4 +1,6 @@
+import axios from 'axios';
 import React, { createContext, useState, useEffect } from 'react';
+import { useLoad } from './LoadContext';
 
 export const AuthContext = createContext();
 
@@ -14,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [valorAReceber, setValorAReceber] = useState(0);
   const [comprasAReceber, setComprasAReceber] = useState(0);
   const [gatewayData, setGatewayData] = useState(null);
+  const { startLoading, stopLoading } = useLoad();
 
   const fetchData = async (token) => {
     const headers = { Authorization: `Bearer ${token}` };
@@ -57,6 +60,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (cpf, password) => {
+    startLoading();
+
     try {
       const response = await fetch(`${process.env.REACT_APP_BASE_ROUTE}auth/token`, {
         method: 'POST',
@@ -71,12 +76,15 @@ export const AuthProvider = ({ children }) => {
         setAuthState({ token: data.token, isAuthenticated: true });
         localStorage.setItem('token', data.token);
         fetchData(data.token); // Busca informações após o login
-        listenToWebhook(); // Escuta os webhooks após o login
+        stopLoading();
         return true;
       }
     } catch (error) {
+      stopLoading();
       console.error('Erro ao fazer login:', error);
     }
+    stopLoading();
+
     return false;
   };
 
@@ -102,12 +110,39 @@ export const AuthProvider = ({ children }) => {
     };
   };
 
+  const adicionarContract = async (contract) => {
+    setPurchases(prevPurchases => [...prevPurchases, contract]);
+  }
+
+  const atualizarSaque = async () => {
+    await fetchData(authState.token);
+  }
+
+  const atualizarClientePorId = async (newClient) => {
+    if (newClient) {
+      setClients(prevClients => {
+        return prevClients.map(client =>
+          client.id === newClient.id ? newClient : client 
+        );
+      });
+    }
+  }
+
+  const atualizarContratoPorId = async (newContract) => {
+    if (newContract) {
+      setPurchases(prevContracts => {
+        return prevContracts.map(contract =>
+          contract.purchaseId === newContract.purchaseId ? newContract : contract 
+        );
+      });
+    }
+  }
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       setAuthState({ token, isAuthenticated: true });
       fetchData(token); // Busca dados do usuário autenticado
-      listenToWebhook(); // Escuta os webhooks ao carregar o token
     }
   }, []);
 
@@ -121,7 +156,7 @@ export const AuthProvider = ({ children }) => {
           somatorio += purchase.amountPaid + (purchase.currentIncome - purchase.amountWithdrawn);
         } else if (purchase.status === 3) {
           somatorio += (purchase.currentIncome - purchase.amountWithdrawn);
-        } else if (purchase.status === 1){
+        } else if (purchase.status === 1) {
           somatorioValorAReceber += purchase.amountPaid;
           somatorioComprasAReceber++;
         }
@@ -147,9 +182,11 @@ export const AuthProvider = ({ children }) => {
   }, [purchases, clients, withdrawals]);
 
   return (
-    <AuthContext.Provider value={{ authState, login, logout, clients, purchases, withdrawals, 
-    extracts, valorTotalNaPlataforma, valorSaquesNaPlataforma, valorClientesParaSacarNaPlataforma, 
-    valorAReceber, comprasAReceber, gatewayData }}>
+    <AuthContext.Provider value={{
+      authState, login, logout, clients, purchases, withdrawals,
+      extracts, valorTotalNaPlataforma, valorSaquesNaPlataforma, valorClientesParaSacarNaPlataforma,
+      valorAReceber, comprasAReceber, gatewayData, adicionarContract, atualizarSaque, atualizarClientePorId, atualizarContratoPorId
+    }}>
       {children}
     </AuthContext.Provider>
   );

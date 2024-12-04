@@ -9,6 +9,7 @@ export const ClientsContainer = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    position: relative;
 `;
 
 export const Title = styled.div`

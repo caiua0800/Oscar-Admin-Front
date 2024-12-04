@@ -1,7 +1,8 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import * as S from "./NovoSaqueStyle";
 import { AuthContext } from "../../Context/AuthContext";
 import helpers from "../../helpers";
+import { useLoad } from "../../Context/LoadContext";
 
 export default function NovoSaque() {
     const { clients, purchases, atualizarDados } = useContext(AuthContext);
@@ -9,6 +10,12 @@ export default function NovoSaque() {
     const [selectedClient, setSelectedClient] = useState(null);
     const [filteredClients, setFilteredClients] = useState([]);
     const [amountDesired, setAmountDesired] = useState(0);
+    const {startLoading, stopLoading} = useLoad();
+    
+    useEffect(() => {
+        startLoading()
+        setTimeout(stopLoading, 500);
+    }, [clients])
 
     const handleSearchChange = (event) => {
         const value = event.target.value.toLowerCase();
@@ -49,6 +56,8 @@ export default function NovoSaque() {
             return;
         }
 
+        startLoading();
+
         if (selectedClient.purchasesObjects.length > 0) {
             var valorAZerar = amountDesired;
             var contratosAdicionados = [];
@@ -71,27 +80,37 @@ export default function NovoSaque() {
             if (valorAZerar > 0) {
                 const res2 = await helpers.novoSaqueExtraBalance(selectedClient.id, valorAZerar);
                 if (res && res2) {
+                    setTimeout(stopLoading, 500);
+                    setSelectedClient(null);
                     alert("Saque criado com sucesso. 👍🏻");
                     return;
                 } else if (res && !res2) {
+                    setTimeout(stopLoading, 500);
+                    setSelectedClient(null);
                     alert("Saque criado com sucesso para os contratos, erro no extra balance. 👍🏻");
                     return;
                 } else if (!res && res2) {
+                    setTimeout(stopLoading, 500);
+                    setSelectedClient(null);
                     alert("Saque criado com sucesso para o extra balance, erro para os contratos. 👍🏻");
                     return;
                 }
             }else{
+                setTimeout(stopLoading, 500);
+                setSelectedClient(null);
                 alert("Saque criado com sucesso. 👍🏻");
                 return;
             }
         } else {
             const res = await helpers.novoSaqueExtraBalance(selectedClient.id, amountDesired);
             if (res) {
+                setTimeout(stopLoading, 500);
                 alert("Saque criado com sucesso. 👍🏻");
                 return;
             }
+            setTimeout(stopLoading, 500);
         }
-
+        setTimeout(stopLoading, 500);
         setSelectedClient(null);
     };
 

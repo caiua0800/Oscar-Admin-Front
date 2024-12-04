@@ -122,7 +122,7 @@ export default function Nav() {
                                             </S.ItemButton>
                                             <S.ItemDropdown show={item4ShowDrop}>
                                                 <S.ItemOptionsDropDown onClick={() => setActiveTab(8)}>Meu Gateway</S.ItemOptionsDropDown>
-                                                <S.ItemOptionsDropDown>Controlador de Saques</S.ItemOptionsDropDown>
+                                                <S.ItemOptionsDropDown onClick={() => setActiveTab(9)}>Chat Suporte</S.ItemOptionsDropDown>
                                                 <S.ItemOptionsDropDown>Controlador de Compras</S.ItemOptionsDropDown>
                                                 <S.ItemOptionsDropDown>Controlador de Indicações</S.ItemOptionsDropDown>
                                             </S.ItemDropdown>

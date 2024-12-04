@@ -3,9 +3,16 @@ import * as S from "./TransacoesStyle";
 import TabelaGeral from "../TabelaGeral/TabelaGeral";
 import { AuthContext } from "../../Context/AuthContext";
 import helpers from "../../helpers";
+import { useLoad } from "../../Context/LoadContext";
 
 export default function Transacoes() {
     const { extracts, clients } = useContext(AuthContext);
+    const {startLoading, stopLoading} = useLoad();
+
+    useEffect(() => {
+        startLoading()
+        setTimeout(stopLoading, 1200);
+    }, [clients, extracts])
 
     const columns = [
         { name: "ID", value: "extractId" },

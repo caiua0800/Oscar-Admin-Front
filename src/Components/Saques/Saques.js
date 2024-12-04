@@ -3,11 +3,16 @@ import * as S from "./SaquesStyle";
 import TabelaGeral from "../TabelaGeral/TabelaGeral";
 import { AuthContext } from "../../Context/AuthContext";
 import helpers from "../../helpers";
+import { useLoad } from "../../Context/LoadContext";
 
 export default function Saques({ setActiveTab, handleSelectClient }) {
     const { withdrawals, clients, atualizarSaque } = useContext(AuthContext);
+    const { startLoading, stopLoading, stopLoadingDelay } = useLoad();
 
-    console.log(withdrawals)
+    useEffect(() => {
+        startLoading()
+        setTimeout(stopLoading, 1200);
+    }, [clients, withdrawals])
 
     const columns = [
         { name: "ID", value: "withdrawalId" },
@@ -103,11 +108,14 @@ export default function Saques({ setActiveTab, handleSelectClient }) {
 
     const handleEditSaque = async (id, newstatus) => {
         if (id && newstatus) {
+            startLoading();
             const res = await helpers.editarStatusSaque(id, newstatus);
 
             if (res) {
+                stopLoadingDelay();
+
                 alert(`Saque ${newstatus === 2 ? "pago" : "negado"} com sucesso.`);
-                atualizarSaque(id, newstatus)
+                atualizarSaque();
             }
         }
     }
@@ -137,7 +145,7 @@ export default function Saques({ setActiveTab, handleSelectClient }) {
                                 <span>Cliente</span>
                                 <S.InputSelectedClient value={selectedWithdrawal.clientName} placeholder="Cliente" readOnly />
                             </div>
-                            <button  onClick={() => handleSelectClientFK(selectedWithdrawal.clientId)}>
+                            <button onClick={() => handleSelectClientFK(selectedWithdrawal.clientId)}>
                                 <img alt="mais informações" src="./clientInfo-blue-icon.png" />
                             </button>
                         </S.BoxInputSelectedClient>

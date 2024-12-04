@@ -1,14 +1,15 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import * as S from "./DashboardStyle";
 import { AuthContext } from "../../Context/AuthContext";
 import helpers from "../../helpers";
 import GraficoEntrada from "../Graficos/GraficoEntrada";
 
 export default function Dashboard() {
-    const { clients, purchases, withdrawals } = useContext(AuthContext);
+    const { clients, purchases, withdrawals, atualizarClientePorId } = useContext(AuthContext);
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
     const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+
 
     // Função para contar quantos clientes foram cadastrados em cada mês
     const getClientsCountByMonth = () => {

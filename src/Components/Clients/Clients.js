@@ -4,12 +4,19 @@ import TabelaGeral from "../TabelaGeral/TabelaGeral";
 import { AuthContext } from "../../Context/AuthContext";
 import helpers from "../../helpers";
 import ExcluirCliente from "./Funcoes/ExcluirCliente/ExcluirCliente";
+import { useLoad } from "../../Context/LoadContext";
 
 export default function Clients({ selectedClientFK, handleSelectClientFK }) {
     const { clients, editarCliente } = useContext(AuthContext);
     const [searchedClients, setSearchedClients] = useState({});
     const [showOptionsMenu, setShowOptionsMenu] = useState(false)
     const [excluirCliente, setExcluirCliente] = useState(false)
+    const {startLoading, stopLoading} = useLoad();
+
+    useEffect(() => {
+        startLoading()
+        setTimeout(stopLoading, 1200);
+    }, [clients])
 
     useEffect(() => {
         if(selectedClientFK){

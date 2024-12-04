@@ -9,6 +9,8 @@ export default function AnteciparLucro({ selectedContract, setAnteciparLucroSele
     const [valor, setValor] = useState(0);
     const { atualizarClientePorId, atualizarContratoPorId } = useContext(AuthContext);
 
+
+
     const handleConfirm = async () => {
         if (valor && valor.trim() !== "") {
             if (parseFloat(valor) <= 0) {
@@ -27,7 +29,7 @@ export default function AnteciparLucro({ selectedContract, setAnteciparLucroSele
                 var clienteAtualizado = null;
                 var contratoAtualizado = null;
                     
-                await axios.get(`http://localhost:5255/api/client/${selectedContract.clientId}`).then(res => {
+                await axios.get(`${process.env.REACT_APP_BASE_ROUTE}client/${selectedContract.clientId}`).then(res => {
                     console.log("res client");
                     console.log(res.data);
                     clienteAtualizado = res.data || null;
@@ -36,7 +38,7 @@ export default function AnteciparLucro({ selectedContract, setAnteciparLucroSele
                     console.log(err);
                 })
 
-                await axios.get(`http://localhost:5255/api/purchase/${selectedContract.purchaseId}`).then(res => {
+                await axios.get(`${process.env.REACT_APP_BASE_ROUTE}purchase/${selectedContract.purchaseId}`).then(res => {
                     console.log("res purchase");
                     console.log(res.data);
                     contratoAtualizado = res.data || null;

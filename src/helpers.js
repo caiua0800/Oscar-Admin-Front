@@ -8,6 +8,7 @@ import Saques from "./Components/Saques/Saques";
 import axios from "axios";
 import Transacoes from "./Components/Transacoes/Transacoes";
 import MeuGateway from "./Components/MeuGateway/MeuGateway";
+import ChatSuporte from "./Components/ChatSuporte/ChatSuporte";
 
 const helpers = {
 
@@ -37,6 +38,8 @@ const helpers = {
                 return <Transacoes setActiveTab={setActiveTab} />
             case 8:
                 return <MeuGateway setActiveTab={setActiveTab} />
+            case 9:
+                return <ChatSuporte />
         }
     },
 
@@ -160,14 +163,15 @@ const helpers = {
             contrato.type = 0;
             contrato.coin = "BRL";
             contrato.status = 1;
+            contrato.productName = "Contrato Personalizado Admin";
 
             try {
                 const res = await axios.post(`${process.env.REACT_APP_BASE_ROUTE}purchase`, contrato);
                 if (res.status === 201) {
-                    alert("Contrato criado com sucesso.");
+                    // alert("Contrato criado com sucesso.");
                     return res.data;
                 } else {
-                    alert("Erro ao criar contrato.");
+                    // alert("Erro ao criar contrato.");
                     return null;
                 }
             } catch (error) {
@@ -398,6 +402,20 @@ const helpers = {
             console.log(error);
             alert("Erro ao solicitar saque.");
             return null;
+        }
+    },
+
+    handleStatusAdminWithdrawn: (st) => {
+
+        switch (st) {
+            case 1:
+                return "Pendente";
+            case 2:
+                return "Pago";
+            case 3:
+                return "Cancelado";
+            default:
+                return "Desconhecido"
         }
     }
 }

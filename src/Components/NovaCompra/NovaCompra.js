@@ -1,7 +1,8 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import * as S from "./NovaCompraStyle";
 import { AuthContext } from "../../Context/AuthContext";
 import helpers from "../../helpers";
+import { useLoad } from "../../Context/LoadContext";
 
 export default function NovaCompra() {
     const { clients, adicionarContract } = useContext(AuthContext);
@@ -13,6 +14,13 @@ export default function NovaCompra() {
     const [porcentagemDeLucro, setPorcentagemDeLucro] = useState(150);
     const [quantidaDeMeses, setQuantidaDeMeses] = useState(36);
     const [quantidadeContratos, setQuantidadeContratos] = useState(0);
+    const {startLoading, stopLoading} = useLoad();
+
+    useEffect(() => {
+        startLoading()
+        setTimeout(stopLoading, 500);
+    }, [clients])
+
 
     const handleSearchChange = (event) => {
         const value = event.target.value.toLowerCase();
@@ -44,6 +52,7 @@ export default function NovaCompra() {
         const brasiliaOffset = -3;
         const brasiliaDate = new Date(currentDate.getTime() + brasiliaOffset * 60 * 60 * 1000);
         const endContractDate = brasiliaDate.toISOString();
+        startLoading();
 
         const res = await helpers.novoContrato({
             clientId: selectedClient.id,
@@ -56,9 +65,14 @@ export default function NovaCompra() {
 
         if (res) {
             console.log("Criado com sucesso");
-            adicionarContract();
+            setTimeout(stopLoading, 500);
+            alert("Contrato criado com sucesso 👍🏻");
+            setSelectedClient(null);
+            await adicionarContract(res);
         } else {
             console.log("Erro ao criar");
+            setTimeout(stopLoading, 500);
+            alert("Erro na criação do contrato 👎🏻");
         }
     }
 

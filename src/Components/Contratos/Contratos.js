@@ -6,6 +6,8 @@ import { AuthContext } from "../../Context/AuthContext";
 import AdicionarSaldo from "./Funcoes/AdicionarSaldo/AdicionarSaldo";
 import AnteciparLucro from "./Funcoes/AnteciparLucro/AnteciparLucro";
 import CancelarContrato from "./Funcoes/CancelarContrato/CancelarContrato";
+import { useLoad } from "../../Context/LoadContext";
+
 
 export default function Contratos({ setActiveTab, handleSelectClient }) {
     const { purchases, clients, editarContract } = useContext(AuthContext);
@@ -16,6 +18,7 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
     const [anteciparLucroSelecionado, setAnteciparLucroSelecionado] = useState(false);
     const [cancelarContratoSelecionado, setCancelarContratoSelecionado] = useState(false);
     const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+    const { startLoading, stopLoading } = useLoad();
 
     const columns = [
         { name: "ID", value: "purchaseId" },
@@ -29,6 +32,11 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
         { name: "GANHO FINAL", value: "finalIncome", insertStart: "R$ ", formatFunction: helpers.formatNumberToCurrency },
         { name: "STATUS", value: "status" }
     ];
+
+    useEffect(() => {
+        startLoading()
+        setTimeout(stopLoading, 1200);
+    }, [purchases])
 
 
     const [searchTerm, setSearchTerm] = useState("");
@@ -83,7 +91,6 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
         setData(formattedData);
     }, [purchases, clients]);
 
-    console.log(purchases)
 
     const handleSearchChange = (event) => {
         const value = event.target.value.toLowerCase();
@@ -204,7 +211,6 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
         handleSelectClient(client);
     };
 
-    console.log(selectedContract)
 
     return (
         <>
@@ -402,6 +408,7 @@ export default function Contratos({ setActiveTab, handleSelectClient }) {
             )}
 
             <S.ClientsContainer>
+
                 <S.Title>PÁGINA DOS CONTRATOS</S.Title>
 
                 <S.Pesquisa>
