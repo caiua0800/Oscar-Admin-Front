@@ -27,15 +27,15 @@ const helpers = {
     formatRelativeDate: (inputDate) => {
         const now = new Date();
         const date = new Date(inputDate);
-    
+
         // Calcula a diferença em milissegundos
         const diffInMilliseconds = now - date;
         const diffInDays = diffInMilliseconds / (1000 * 60 * 60 * 24);
-    
+
         // Formata a hora e minuto
         const hour = date.getHours().toString().padStart(2, '0');
         const minute = date.getMinutes().toString().padStart(2, '0');
-    
+
         if (diffInDays < 1) {
             // Se faz menos de um dia
             return `${hour}:${minute}`;
@@ -79,8 +79,7 @@ const helpers = {
         if (cliente) {
             try {
                 const res = await axios.post(`${process.env.REACT_APP_BASE_ROUTE}client`, cliente);
-                console.log(`Resposta Servidor (Criação De Cliente): ${res}`);
-                return true;
+                return res.data;
             } catch (err) {
                 console.log(`Erro Servidor (Criação De Cliente): ${err}`);
                 return false;
@@ -237,51 +236,38 @@ const helpers = {
 
     percentageMultiply: (num) => { return parseFloat(num) * 100; },
 
-    novoSaque: async (clientId, selectedContracts) => {
-        if (!clientId || !selectedContracts || selectedContracts.length === 0) {
+    novoSaque: async (clientId, valor) => {
+        if (!clientId || !valor || valor <= 0) {
             alert("Erro ao realizar saque: Informações incompletas.");
             console.log("Erro ao realizar saque: Informações incompletas.");
             return null;
         }
 
         try {
-            for (const contract of selectedContracts) {
-                try {
-                    const res = await axios.post(`${process.env.REACT_APP_BASE_ROUTE}withdrawal`, {
-                        clientId,
-                        amountWithdrawn: parseFloat(contract.amount),
-                        itemId: contract.purchaseId
-                    });
+            const res = await axios.post(`${process.env.REACT_APP_BASE_ROUTE}withdrawal`, {
+                clientId,
+                amountWithdrawn: parseFloat(valor)
+            });
 
-                    if (res.status === 201) {
-                        console.log("Saque criado com sucesso.", res.data);
-                        return true;
-                    } else {
-                        console.log("Erro ao criar saque:", res);
-                        alert("Erro ao criar saque.");
-                        return null;
-                    }
-                } catch (error) {
-                    console.log("Error ao processar o saque para o contrato:", contract.purchaseId, error);
-                    const errorMessage = error.response && error.response.data
-                        ? error.response.data
-                        : 'Erro ao criar saque.';
-
-                    const acharMensagem = "Não foi possível realizar o saque: Saldo bloqueado.";
-                    if (errorMessage.toLowerCase().includes(acharMensagem.toLowerCase())) {
-                        alert(acharMensagem);
-                    } else {
-                        alert(errorMessage);
-                    }
-                }
+            if (res.status === 201) {
+                console.log("Saque criado com sucesso.", res.data);
+                return true;
+            } else {
+                console.log("Erro ao criar saque:", res);
+                return null;
             }
-
-            alert("Todos os saques foram processados com sucesso.");
-            return true; // Retorno final após todos os saques
         } catch (error) {
-            console.log("Erro geral ao realizar o saque:", error);
-            alert("Um erro inesperado ocorreu ao tentar realizar o saque.");
-            return null;
+            console.log("Error ao processar o saque:", error);
+            const errorMessage = error.response && error.response.data
+                ? error.response.data
+                : 'Erro ao criar saque.';
+
+            const acharMensagem = "Não foi possível realizar o saque: Saldo bloqueado.";
+            if (errorMessage.toLowerCase().includes(acharMensagem.toLowerCase())) {
+                alert(acharMensagem);
+            } else {
+                alert(errorMessage);
+            }
         }
     },
 

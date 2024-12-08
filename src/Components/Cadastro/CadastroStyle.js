@@ -32,10 +32,11 @@ export const ConteudoCadastro = styled.div`
 export const Informacao = styled.div`
     width: 450px;
     position: relative;
+    
     input{
         width: 100%;
         height: 50px;
-        border-radius: 6px;
+        border-radius: 3px;
         background: #1E3E62;
         box-sizing: border-box;
         font-size: 18px;
@@ -53,7 +54,7 @@ export const Informacao = styled.div`
         color: white;
         background: rgba(0,20,100, 1);
         border: 2bx solid rgba(255, 255, 255, 1);
-        border-radius: 6px;
+        border-radius: 3px;
         height: 40px;
     }
 `;
@@ -67,7 +68,7 @@ export const CadastroSenha = styled.div`
     input{
         width: 450px;
         height: 50px;
-        border-radius: 6px;
+        border-radius: 3px;
         background: #1E3E62;
         box-sizing: border-box;
         font-size: 18px;
@@ -79,7 +80,7 @@ export const CadastroSenha = styled.div`
 
 export const ButtonConfirmar = styled.div`
     width: 920px;
-    border-radius: 6px;
+    border-radius: 3px;
     background: rgba(0, 220, 0, 1);
     text-align: center;
     display: flex;

@@ -7,7 +7,7 @@ import ExcluirCliente from "./Funcoes/ExcluirCliente/ExcluirCliente";
 import { useLoad } from "../../Context/LoadContext";
 
 export default function Clients({ selectedClientFK, handleSelectClientFK }) {
-    const { clients, editarCliente } = useContext(AuthContext);
+    const { clients, atualizarClientePorId } = useContext(AuthContext);
     const [searchedClients, setSearchedClients] = useState({});
     const [showOptionsMenu, setShowOptionsMenu] = useState(false)
     const [excluirCliente, setExcluirCliente] = useState(false)
@@ -41,6 +41,7 @@ export default function Clients({ selectedClientFK, handleSelectClientFK }) {
         { name: "Lucro Padrão", value: "clientProfit", insertEnd: "%", formatFunction: helpers.percentageMultiply },
         { name: "Saldo Bloqueado", value: "blockedBalance", insertStart: "R$", formatFunction: helpers.formatNumberToCurrency },
         { name: "Saldo", value: "balance", insertStart: "R$ ", formatFunction: helpers.formatNumberToCurrency },
+        { name: "Saldo Extra", value: "extraBalance", insertStart: "R$ ", formatFunction: helpers.formatNumberToCurrency },
         { name: "Status", value: "status", formatFunction: helpers.handleStatusClient },
     ];
 
@@ -223,7 +224,7 @@ export default function Clients({ selectedClientFK, handleSelectClientFK }) {
         const success = await helpers.editarCliente(currentClient);
         if (success) {
             const updatedClient = { ...currentClient };
-            editarCliente(updatedClient); // Atualiza o cliente no contexto
+            atualizarClientePorId(updatedClient); 
             setSelectedClient(null);
             setCurrentClient(null);
         } else {
@@ -231,7 +232,6 @@ export default function Clients({ selectedClientFK, handleSelectClientFK }) {
         }
     };
 
-    console.log(clients);
 
     return (
         <>

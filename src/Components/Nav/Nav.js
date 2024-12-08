@@ -51,7 +51,6 @@ export default function Nav() {
                                             </S.ItemButton>
                                         </S.Item>
                                         <S.Item open={open} onClick={() => setItem1ShowDrop(!item1ShowDrop)} >
-                                            {/* <a target="_blank" href="https://icons8.com/icon/42241/people">People</a> ícone por <a target="_blank" href="https://icons8.com">Icons8</a> */}
                                             <S.ItemButton open={open}>
                                                 <S.ItemImage>
                                                     <img src="./people-blue-icon.png" alt="clientes" />

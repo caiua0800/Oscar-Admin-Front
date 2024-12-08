@@ -2,12 +2,14 @@ import React, { useContext, useState } from "react";
 import * as S from "./CadastroStyle";
 import helpers from "../../helpers";
 import { AuthContext } from "../../Context/AuthContext";
+import { useLoad } from "../../Context/LoadContext";
 
 export default function Cadastro() {
-    const { clients, atualizarDados } = useContext(AuthContext);
+    const { clients, atualizarClientePorId, inserirNovoCliente } = useContext(AuthContext);
     const [showIndicadores, setShowIndicadores] = useState(false);
     const [sponsorSelected, setSponsorSelected] = useState(null);
     const [filteredSponsors, setFilteredSponsors] = useState([]);
+    const {startLoading, stopLoading} = useLoad();
 
     const [cliente, setCliente] = useState({
         name: "",
@@ -51,7 +53,6 @@ export default function Cadastro() {
     };
 
     const handleCreate = async () => {
-        // Validação para checar se todos os campos necessários estão preenchidos
         if (!cliente.name || !cliente.id || !cliente.email || !cliente.phone || !cliente.address.street ||
             !cliente.address.number || !cliente.address.city || !cliente.address.zipcode ||
             !cliente.password || !cliente.confirmPassword || cliente.password != cliente.confirmPassword || !cliente.address.state) {
@@ -62,7 +63,6 @@ export default function Cadastro() {
             return;
         }
 
-        // Valida se a senha e a confirmação estão iguais
         if (cliente.password !== cliente.confirmPassword) {
             alert("A senha e a confirmação da senha não coincidem.");
             return;
@@ -71,15 +71,16 @@ export default function Cadastro() {
         if (cliente.sponsorId.trim() === "") {
             setCliente({
                 ...cliente,
-                sponsorId: "" // Assegura que sponsorId está vazio se não for preenchido
+                sponsorId: "" 
             });
         }
+        startLoading();
 
         const response = await helpers.cadastro(cliente);
-        if (response) {
+        if (response != null) {
             alert("Cliente criado com sucesso!");
-            await atualizarDados();
-            setCliente({ // Reseta os campos de cliente após criação
+            inserirNovoCliente(response);
+            setCliente({
                 name: "",
                 id: "",
                 email: "",
@@ -101,8 +102,10 @@ export default function Cadastro() {
                     zipcode: ""
                 }
             });
+            stopLoading();
         } else {
             alert("Erro ao criar o Cliente.");
+            stopLoading();
         }
     };
 
@@ -112,7 +115,6 @@ export default function Cadastro() {
         if (val.trim() !== "") {
             setShowIndicadores(true);
 
-            // Filtra os clientes garantindo que name e cpf sejam definidos
             const filtered = clients.filter(cl =>
                 (cl.name && cl.name.toUpperCase().includes(val.toUpperCase())) ||
                 (cl.cpf && cl.cpf.includes(val))

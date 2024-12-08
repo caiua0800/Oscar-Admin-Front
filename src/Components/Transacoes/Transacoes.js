@@ -9,6 +9,7 @@ export default function Transacoes() {
     const { extracts, clients } = useContext(AuthContext);
     const {startLoading, stopLoading} = useLoad();
 
+
     useEffect(() => {
         startLoading()
         setTimeout(stopLoading, 1200);
@@ -17,6 +18,7 @@ export default function Transacoes() {
     const columns = [
         { name: "ID", value: "extractId" },
         { name: "TIPO", value: "name" },
+        { name: "DATA", value: "dateCreated", formatFunction: helpers.formatDate },
         { name: "CLIENTE", value: "clientName", formatFunction: helpers.handleDesconhecido },
         { name: "ID CLIENTE", value: "clientId" },
         { name: "VALOR", value: "totalAmount", insertStart: "R$ ", formatFunction: helpers.formatNumberToCurrency }

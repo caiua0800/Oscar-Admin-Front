@@ -5,7 +5,7 @@ import helpers from "../../helpers";
 import { useLoad } from "../../Context/LoadContext";
 
 export default function NovoSaque() {
-    const { clients, purchases, atualizarDados } = useContext(AuthContext);
+    const { clients, purchases } = useContext(AuthContext);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedClient, setSelectedClient] = useState(null);
     const [filteredClients, setFilteredClients] = useState([]);
@@ -58,60 +58,16 @@ export default function NovoSaque() {
 
         startLoading();
 
-        if (selectedClient.purchasesObjects.length > 0) {
-            var valorAZerar = amountDesired;
-            var contratosAdicionados = [];
+        const res = await helpers.novoSaque(selectedClient.id, amountDesired);
 
-            var contratos = selectedClient.purchasesObjects;
-            contratos.forEach(contrato => {
-                if (valorAZerar > 0) {
-                    if (valorAZerar <= (contrato.currentIncome - contrato.amountWithdrawn)) {
-                        contratosAdicionados.push({ purchaseId: contrato.purchaseId, amount: valorAZerar });
-                        valorAZerar = 0;
-                    } else {
-                        contratosAdicionados.push({ purchaseId: contrato.purchaseId, amount: (contrato.currentIncome - contrato.amountWithdrawn) });
-                        valorAZerar -= (contrato.currentIncome - contrato.amountWithdrawn);
-                    }
-                }
-            })
-
-            const res = await helpers.novoSaque(selectedClient.id, contratosAdicionados);
-
-            if (valorAZerar > 0) {
-                const res2 = await helpers.novoSaqueExtraBalance(selectedClient.id, valorAZerar);
-                if (res && res2) {
-                    setTimeout(stopLoading, 500);
-                    setSelectedClient(null);
-                    alert("Saque criado com sucesso. 👍🏻");
-                    return;
-                } else if (res && !res2) {
-                    setTimeout(stopLoading, 500);
-                    setSelectedClient(null);
-                    alert("Saque criado com sucesso para os contratos, erro no extra balance. 👍🏻");
-                    return;
-                } else if (!res && res2) {
-                    setTimeout(stopLoading, 500);
-                    setSelectedClient(null);
-                    alert("Saque criado com sucesso para o extra balance, erro para os contratos. 👍🏻");
-                    return;
-                }
-            }else{
-                setTimeout(stopLoading, 500);
-                setSelectedClient(null);
-                alert("Saque criado com sucesso. 👍🏻");
-                return;
-            }
-        } else {
-            const res = await helpers.novoSaqueExtraBalance(selectedClient.id, amountDesired);
-            if (res) {
-                setTimeout(stopLoading, 500);
-                alert("Saque criado com sucesso. 👍🏻");
-                return;
-            }
-            setTimeout(stopLoading, 500);
+        if(res){
+            setSelectedClient(null);
+            alert("Saque criado com sucesso. 👍🏻");
+        }else{
+            alert("Erro ao realizar saque!");
         }
         setTimeout(stopLoading, 500);
-        setSelectedClient(null);
+
     };
 
 
@@ -157,7 +113,7 @@ export default function NovoSaque() {
                     </S.Informacao>
 
                     <S.Informacao>
-                        <span>Saldo Cliente</span>
+                        <span>Saldo Carteira</span>
                         <input
                             value={(selectedClient.balance).toFixed(2) || 0}
                             type="number"
@@ -166,9 +122,18 @@ export default function NovoSaque() {
                     </S.Informacao>
 
                     <S.Informacao>
+                        <span>Saldo Extra</span>
+                        <input
+                            value={(selectedClient.extraBalance).toFixed(2) || 0}
+                            type="number"
+                            placeholder="Valor"
+                        />
+                    </S.Informacao>
+
+                    <S.Informacao>
                         <span>Saldo Disponível</span>
                         <input
-                            value={(selectedClient.balance - (selectedClient.blockedBalance || 0)).toFixed(2) || 0}
+                            value={(selectedClient.balance + selectedClient.extraBalance - (selectedClient.blockedBalance || 0)).toFixed(2) || 0}
                             type="number"
                             placeholder="Valor"
                             readOnly

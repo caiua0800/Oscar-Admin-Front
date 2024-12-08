@@ -129,9 +129,15 @@ export const AuthProvider = ({ children }) => {
     if (newClient) {
       setClients(prevClients => {
         return prevClients.map(client =>
-          client.id === newClient.id ? newClient : client 
+          client.id === newClient.id ? newClient : client
         );
       });
+    }
+  }
+
+  const inserirNovoCliente = async (newClient) => {
+    if (newClient) {
+      setClients([...clients, newClient]);
     }
   }
 
@@ -139,7 +145,7 @@ export const AuthProvider = ({ children }) => {
     if (newContract) {
       setPurchases(prevContracts => {
         return prevContracts.map(contract =>
-          contract.purchaseId === newContract.purchaseId ? newContract : contract 
+          contract.purchaseId === newContract.purchaseId ? newContract : contract
         );
       });
     }
@@ -149,7 +155,7 @@ export const AuthProvider = ({ children }) => {
     if (newChat) {
       setChats(prevChats => {
         return prevChats.map(chat =>
-          chat.clientId === newChat.clientId ? newChat : chat 
+          chat.clientId === newChat.clientId ? newChat : chat
         );
       });
     }
@@ -212,7 +218,7 @@ export const AuthProvider = ({ children }) => {
       authState, login, logout, clients, purchases, withdrawals,
       extracts, valorTotalNaPlataforma, valorSaquesNaPlataforma, valorClientesParaSacarNaPlataforma,
       valorAReceber, comprasAReceber, gatewayData, adicionarContract, atualizarSaque,
-       atualizarClientePorId, atualizarContratoPorId, chats, atualizarChat, atualizarTodosOsChats
+      atualizarClientePorId, atualizarContratoPorId, chats, atualizarChat, atualizarTodosOsChats, inserirNovoCliente
     }}>
       {children}
     </AuthContext.Provider>

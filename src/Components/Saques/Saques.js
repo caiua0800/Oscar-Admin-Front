@@ -19,7 +19,7 @@ export default function Saques({ setActiveTab, handleSelectClient }) {
         { name: "CLIENTE", value: "clientName" },
         { name: "VALOR TOTAL", value: "totalWithdrawn", insertStart: "R$ " },
         { name: "VALOR RECEBÍVEL", value: "receivableAmount", insertStart: "R$ " },
-        { name: "ID ITEM", value: "itemId" },
+        { name: "RETIRADO DE", value: "itemsId" },
         { name: "DATA", value: "dateCreated" },
         { name: "AGÊNCIA", value: "agency" },
         { name: "CONTA", value: "account" },
@@ -37,6 +37,14 @@ export default function Saques({ setActiveTab, handleSelectClient }) {
     const [sortOrder, setSortOrder] = useState("Crescente");
     const itemsPerPage = 10;
 
+    const returnStr = (arra) => {
+        if (arra && arra.length > 0) {
+            return arra.join(", ");
+        }
+        return ""; 
+    }
+
+
     useEffect(() => {
         const formattedData = withdrawals.map(withdrawal => {
             const client = clients.find(client => client.id === withdrawal.clientId);
@@ -51,7 +59,7 @@ export default function Saques({ setActiveTab, handleSelectClient }) {
                 totalWithdrawn: (withdrawal.amountWithdrawn || 0).toFixed(2),
                 receivableAmount: ((withdrawal.amountWithdrawn - (withdrawal.amountWithdrawn * 0.04)) || 0).toFixed(2),
                 dateCreated: formattedDate,
-                itemId: withdrawal.itemId,
+                itemsId: returnStr(withdrawal.withdrawnItems),
                 agency: withdrawal.agency || "N/A",
                 account: withdrawal.account || "N/A",
                 accountType: withdrawal.accountType || "N/A",
