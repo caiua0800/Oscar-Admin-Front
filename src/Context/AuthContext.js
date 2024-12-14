@@ -16,20 +16,31 @@ export const AuthProvider = ({ children }) => {
   const [valorAReceber, setValorAReceber] = useState(0);
   const [comprasAReceber, setComprasAReceber] = useState(0);
   const [chats, setChats] = useState([]);
+  const [contractModels, setContractModels] = useState([]);
   const [gatewayData, setGatewayData] = useState(null);
   const { startLoading, stopLoading } = useLoad();
+
+  useEffect(() => {
+    if (clients.length === 0) {
+      startLoading();
+    } else {
+      stopLoading();
+    }
+  }, [clients]);
+
 
   const fetchData = async (token) => {
     const headers = { Authorization: `Bearer ${token}` };
 
     try {
-      const [clientsResponse, purchasesResponse, withdrawalsResponse, extractsResponse, gatewayResponse, chatResponse] = await Promise.all([
+      const [clientsResponse, purchasesResponse, withdrawalsResponse, extractsResponse, gatewayResponse, chatResponse, contractResponse] = await Promise.all([
         fetch(`${process.env.REACT_APP_BASE_ROUTE}client/`, { headers }),
         fetch(`${process.env.REACT_APP_BASE_ROUTE}purchase`, { headers }),
         fetch(`${process.env.REACT_APP_BASE_ROUTE}withdrawal`, { headers }),
         fetch(`${process.env.REACT_APP_BASE_ROUTE}extract`, { headers }),
         fetch(`${process.env.REACT_APP_BASE_ROUTE}gateway`, { headers }),
         fetch(`${process.env.REACT_APP_BASE_ROUTE}chat/all`, { headers }),
+        fetch(`${process.env.REACT_APP_BASE_ROUTE}contract/`, { headers }),
       ]);
 
       if (clientsResponse.ok) {
@@ -60,6 +71,11 @@ export const AuthProvider = ({ children }) => {
       if (chatResponse.ok) {
         const chatsData = await chatResponse.json();
         setChats(chatsData);
+      }
+
+      if (contractResponse.ok) {
+        const contractsData = await contractResponse.json();
+        setContractModels(contractsData);
       }
     } catch (error) {
       console.error('Erro ao buscar dados do cliente, compras ou saques:', error);
@@ -119,6 +135,24 @@ export const AuthProvider = ({ children }) => {
 
   const adicionarContract = async (contract) => {
     setPurchases(prevPurchases => [...prevPurchases, contract]);
+  }
+
+  const puxarModelosAtualizados = async () => {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BASE_ROUTE}contract/`, { headers });
+
+      if (response.ok) { // Verifica se a resposta foi bem-sucedida
+        const contractsData = await response.json(); // Faz o parse da resposta para JSON
+        setContractModels(contractsData); // Atualiza o estado com os dados dos contratos
+      } else {
+        console.error("Erro ao obter modelos de contratos atualizados:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Erro ao obter modelos de contratos atualizados:", error);
+    }
   }
 
   const atualizarSaque = async () => {
@@ -218,7 +252,8 @@ export const AuthProvider = ({ children }) => {
       authState, login, logout, clients, purchases, withdrawals,
       extracts, valorTotalNaPlataforma, valorSaquesNaPlataforma, valorClientesParaSacarNaPlataforma,
       valorAReceber, comprasAReceber, gatewayData, adicionarContract, atualizarSaque,
-      atualizarClientePorId, atualizarContratoPorId, chats, atualizarChat, atualizarTodosOsChats, inserirNovoCliente
+      atualizarClientePorId, atualizarContratoPorId, chats, atualizarChat, atualizarTodosOsChats,
+      inserirNovoCliente, contractModels, puxarModelosAtualizados
     }}>
       {children}
     </AuthContext.Provider>

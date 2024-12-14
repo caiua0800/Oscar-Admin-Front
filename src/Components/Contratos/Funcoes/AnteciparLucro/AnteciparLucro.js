@@ -4,10 +4,12 @@ import { useContext } from "react";
 import { AuthContext } from "../../../../Context/AuthContext";
 import helpers from "../../../../helpers";
 import axios from "axios";
+import { useLoad } from "../../../../Context/LoadContext";
 
 export default function AnteciparLucro({ selectedContract, setAnteciparLucroSelecionado, setSelectedContract }) {
     const [valor, setValor] = useState(0);
     const { atualizarClientePorId, atualizarContratoPorId } = useContext(AuthContext);
+    const {startLoading, stopLoading} = useLoad();
 
 
 
@@ -22,6 +24,8 @@ export default function AnteciparLucro({ selectedContract, setAnteciparLucroSele
                 alert(`O valor máximo que esse cliente pode sacar é de R$${helpers.formatNumberToCurrency((selectedContract.totalPrice*1.5 - selectedContract.currentIncome))}`);
                 return;
             }
+
+            startLoading();
 
             const resposta = await helpers.anteciparLucroDoContrato(selectedContract.purchaseId, valor);
 
@@ -55,13 +59,16 @@ export default function AnteciparLucro({ selectedContract, setAnteciparLucroSele
                 alert("Lucro do contrato antecipado com sucesso! 👏🏻");
                 setSelectedContract(null);
                 setAnteciparLucroSelecionado(false);
+                stopLoading();
                 return;
             } else {
                 alert("Erro ao antecipar lucro do contrato! ❌");
+                stopLoading();
                 return;
             }
         } else {
             alert("Digite um valor para realizar a operação.");
+            stopLoading();
             return;
         }
     }

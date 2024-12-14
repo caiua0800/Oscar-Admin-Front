@@ -8,7 +8,6 @@ export const DashboardContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    // background: linear-gradient(to right, rgba(20, 20, 20, 1), rgba(0, 0, 0, 1));
     justify-content: center;
 `;
 

@@ -4,10 +4,12 @@ import { useContext } from "react";
 import { AuthContext } from "../../../../Context/AuthContext";
 import helpers from "../../../../helpers";
 import axios from "axios";
+import { useLoad } from "../../../../Context/LoadContext";
 
 export default function AdicionarSaldo({ selectedContract, setAdicionarSaldoSelecionado, setSelectedContract }) {
     const [valor, setValor] = useState(0);
     const { atualizarClientePorId, atualizarContratoPorId } = useContext(AuthContext);
+    const {startLoading, stopLoading} = useLoad();
 
     const handleConfirm = async () => {
         if (valor && valor.trim() !== "") {
@@ -20,11 +22,11 @@ export default function AdicionarSaldo({ selectedContract, setAdicionarSaldoSele
                 alert(`O valor máximo que esse cliente pode sacar é de R$${helpers.formatNumberToCurrency(selectedContract.clientBalance - selectedContract.clientBlockedBalance)}`);
                 return;
             }
-
+            
+            startLoading();
             const resposta = await helpers.adicionarSaldoAContrato(selectedContract.purchaseId, valor);
 
             if (resposta) {
-
                 var clienteAtualizado = null;
                 var contratoAtualizado = null;
                     
@@ -54,16 +56,20 @@ export default function AdicionarSaldo({ selectedContract, setAdicionarSaldoSele
                 alert("Saldo adicionado ao contrato com sucesso! 👏🏻");
                 setSelectedContract(null);
                 setAdicionarSaldoSelecionado(false);
+                stopLoading();
                 return;
             } else {
                 alert("Erro ao adicionar saldo ao contrato! ❌");
+                stopLoading();
                 return;
             }
         } else {
             alert("Digite um valor para realizar a operação.");
+            stopLoading();
             return;
         }
-    }
+    }   
+
 
     return (
         <AdicionarSaldoContainer>

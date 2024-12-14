@@ -9,6 +9,7 @@ import axios from "axios";
 import Transacoes from "./Components/Transacoes/Transacoes";
 import MeuGateway from "./Components/MeuGateway/MeuGateway";
 import ChatSuporte from "./Components/ChatSuporte/ChatSuporte";
+import ControladorContratos from "./Components/Controladores/Contratos/Contratos";
 
 const helpers = {
 
@@ -72,6 +73,8 @@ const helpers = {
                 return <MeuGateway setActiveTab={setActiveTab} />
             case 9:
                 return <ChatSuporte />
+            case 10:
+                return <ControladorContratos />
         }
     },
 
@@ -434,6 +437,91 @@ const helpers = {
                 return "Cancelado";
             default:
                 return "Desconhecido"
+        }
+    },
+
+    handleEditContractModel: async (modelId, updatedContractModel) => {
+        if (modelId && updatedContractModel) {
+            updatedContractModel.id = modelId;
+
+            try {
+                const response = await axios.put(`${process.env.REACT_APP_BASE_ROUTE}contract/edit/${modelId}`, updatedContractModel, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.status === 204) { // 204 No Content indica sucesso na atualização
+                    // Atualização bem-sucedida
+                    console.log("Contrato atualizado com sucesso.");
+                    return true;
+                } else {
+                    // Tratar erro (outros status?)
+                    console.error("Erro ao atualizar contrato:", response.data);
+                    return false;
+                }
+            } catch (error) {
+                console.error("error");
+                console.error(error);
+                return false;
+            }
+        } else {
+            console.error("ID do modelo ou modelo atualizado não podem ser nulos.");
+            return false;
+        }
+    },
+
+    handleDeleteContractModel: async (modelId) => {
+        if (modelId) {
+            try {
+                const response = await axios.delete(`${process.env.REACT_APP_BASE_ROUTE}contract/${modelId}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.status === 204) {
+                    console.log("Contrato deletado com sucesso.");
+                    return true;
+                } else {
+                    // Tratar erro (outros status?)
+                    console.error("Erro ao deletar contrato:", response.data);
+                    return false;
+                }
+            } catch (error) {
+                console.error("error");
+                console.error(error);
+                return false;
+            }
+        } else {
+            console.error("Erro ao deletar o contrato.");
+            return false;
+        }
+    },
+
+    handleCreateModeloContrato: async (modelo) => {
+        if (modelo) {
+            try {
+                const response = await axios.post(`${process.env.REACT_APP_BASE_ROUTE}contract`, modelo, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.status === 201) { // 201 Created indica que o contrato foi criado com sucesso
+                    console.log("Contrato criado com sucesso.");
+                    return true;
+                } else {
+                    console.error("Erro ao criar contrato:", response.data);
+                    return false;
+                }
+            } catch (error) {
+                console.error("Erro ao criar contrato:", error);
+                return false;
+            }
+        } else {
+            console.error("Modelo de contrato não pode ser nulo.");
+            return false;
         }
     }
 }
